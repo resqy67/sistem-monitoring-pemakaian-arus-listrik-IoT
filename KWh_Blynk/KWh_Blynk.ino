@@ -17,18 +17,15 @@ char auth[] = "iCnh8lqWRbl81St2F5sNi3Wkd_n3Mvob";
 void setup() {
   // Inisialisasi serial
   Serial.begin(9600);
-  
-  // Membuat objek WiFiManager
   WiFiManager wifiManager;
-
-  // Reset konfigurasi WiFiManager sebelumnya
-  // wifiManager.resetSettings();
   pinMode(RESET_BUTTON_PIN, INPUT_PULLUP);
 
   lcd.init();
   lcd.backlight();
   lcd.setCursor(0, 0);
   lcd.print("Starting ...");
+  lcd.setCursor(1, 0);
+  lcd.print("Login Portal!")
   delay(500);
 
   // Mencoba menghubungkan ke jaringan WiFi yang tersimpan
@@ -100,7 +97,10 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print("V:");
     lcd.print(voltage);
-    Blynk.virtualWrite(V0, voltage);
+    Blynk.virtualWrite(V1, voltage);
+    if (voltage > 240){
+      Blynk.logEvent("unsafe_voltage");
+    }
   } else {
     Serial.println("Error reading voltage");
   }
@@ -110,7 +110,7 @@ void loop() {
     Serial.print("Current: ");
     Serial.print(current);
     Serial.println("A");
-    Blynk.virtualWrite(V1, current);
+    Blynk.virtualWrite(V2, current);
   } else {
     Serial.println("Error reading current");
   }
@@ -124,7 +124,10 @@ void loop() {
     lcd.setCursor(8, 0);
     lcd.print(" W:");
     lcd.print(power);
-    Blynk.virtualWrite(V2, power);
+    Blynk.virtualWrite(V3, power);
+    if (power > 100){
+      Blynk.logEvent("unsafe_watt");
+    }
   } else {
     Serial.println("Error reading power");
   }
@@ -137,7 +140,7 @@ void loop() {
     lcd.setCursor(0, 1);
     lcd.print("kWh:");
     lcd.print(energy);
-    Blynk.virtualWrite(V3, energy);
+    Blynk.virtualWrite(V4, energy);
   } else {
     Serial.println("Error reading energy");
   }
@@ -151,7 +154,7 @@ void loop() {
     lcd.setCursor(8, 1);
     lcd.print(" f:");
     lcd.print(frequency);
-    Blynk.virtualWrite(V4, frequency);
+    Blynk.virtualWrite(V5, frequency);
   } else {
     Serial.println("Error reading frequency");
   }
@@ -160,10 +163,13 @@ void loop() {
   if (!isnan(pf)) {
     Serial.print("PF: ");
     Serial.println(pf);
-    Blynk.virtualWrite(V5, pf);
+    Blynk.virtualWrite(V6, pf);
   } else {
     Serial.println("Error reading power factor");
   }
+
+  // int resEnergy = pzem.resetEnergy();
+  // Blynk.virtualWrite(V7, resEnergy);
 
   delay(2000);
   lcd.clear();
@@ -224,9 +230,9 @@ void startAccessPointMode() {
   }
 
   lcd.clear();
-  lcd.print("Connected to WIFi!");
+  lcd.print("Connected WIFi!");
   lcd.setCursor(0, 1);
-  lcd.print("IP: " + WiFi.localIP().toString());
+  lcd.print("IP:" + WiFi.localIP().toString());
   delay(5000);
   Serial.println("Terhubung ke jaringan WiFi!");
   Serial.print("Alamat IP: ");
